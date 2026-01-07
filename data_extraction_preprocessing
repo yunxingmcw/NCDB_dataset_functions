@@ -1,0 +1,547 @@
+import pandas as pd
+
+def extraction(data):
+    """
+    Extract columns from fixed-width text data based on NCDB PUF 2021 structure.
+
+    Args:
+        data (pd.DataFrame): DataFrame with a single column containing fixed-width strings.
+
+    Returns:
+        pd.DataFrame: DataFrame with extracted columns.
+    """
+    # Define column specifications: (name, start, end)
+    columns = [
+        ('PUF_CASE_ID', 0, 37),
+        ('PUF_FACILITY_ID', 37, 47),
+        ('FACILITY_TYPE_CD', 47, 48),
+        ('FACILITY_LOCATION_CD', 48, 49),
+        ('AGE', 49, 52),
+        ('SEX', 52, 53),
+        ('RACE', 53, 55),
+        ('SPANISH_HISPANIC_ORIGIN', 55, 56),
+        ('INSURANCE_STATUS', 56, 58),
+        ('MED_INC_QUAR_00', 58, 59),
+        ('NO_HSD_QUAR_00', 59, 60),
+        ('Urban/Rural 2003', 60, 61),
+        ('MED_INC_QUAR_12', 61, 62),
+        ('NO_HSD_QUAR_12', 62, 63),
+        ('Urban/Rural 2013', 63, 64),
+        ('Great Circle Distance', 64, 72),
+        ('Charlson-Deyo Score', 72, 74),
+        ('SEQUENCE_NUMBER', 74, 76),
+        ('CLASS_OF_CASE', 76, 78),
+        ('YEAR_OF_DIAGNOSIS', 78, 82),
+        ('PRIMARY_SITE', 82, 86),
+        ('LATERALITY', 86, 87),
+        ('HISTOLOGY', 87, 91),
+        ('BEHAVIOR', 91, 92),
+        ('GRADE', 92, 93),
+        ('DIAGNOSTIC_CONFIRMATION', 93, 94),
+        ('TUMOR_SIZE', 94, 97),
+        ('REGIONAL_NODES_POSITIVE', 97, 99),
+        ('REGIONAL_NODES_EXAMINED', 99, 101),
+        ('DX_STAGING_PROC_DAYS', 101, 109),
+        ('RX_SUMM_DXSTG_PROC', 109, 111),
+        ('TNM_CLIN_T', 111, 116),
+        ('TNM_CLIN_N', 116, 121),
+        ('TNM_CLIN_M', 121, 126),
+        ('TNM_CLIN_STAGE_GROUP', 126, 130),
+        ('TNM_PATH_T', 130, 135),
+        ('TNM_PATH_N', 135, 140),
+        ('TNM_PATH_M', 140, 145),
+        ('TNM_PATH_STAGE_GROUP', 145, 149),
+        ('TNM_EDITION_NUMBER', 149, 151),
+        ('ANALYTIC_STAGE_GROUP', 151, 152),
+        ('CS_METS_AT_DX', 152, 154),
+        ('CS_METS_EVAL', 154, 155),
+        ('CS_EXTENSION', 155, 158),
+        ('CS_TUMOR_SIZEEXT_EVAL', 158, 159),
+        ('CS_METS_DX_BONE', 159, 160),
+        ('CS_METS_DX_BRAIN', 160, 161),
+        ('CS_METS_DX_LIVER', 161, 162),
+        ('CS_METS_DX_LUNG', 162, 163),
+        ('LYMPH_VASCULAR_INVASION', 163, 164),
+        ('CS_SITESPECIFIC_FACTOR_1', 164, 167),
+        ('CS_SITESPECIFIC_FACTOR_2', 167, 170),
+        ('CS_SITESPECIFIC_FACTOR_3', 170, 173),
+        ('CS_SITESPECIFIC_FACTOR_4', 173, 176),
+        ('CS_SITESPECIFIC_FACTOR_5', 176, 179),
+        ('CS_SITESPECIFIC_FACTOR_6', 179, 182),
+        ('CS_SITESPECIFIC_FACTOR_7', 182, 185),
+        ('CS_SITESPECIFIC_FACTOR_8', 185, 188),
+        ('CS_SITESPECIFIC_FACTOR_9', 188, 191),
+        ('CS_SITESPECIFIC_FACTOR_10', 191, 194),
+        ('CS_SITESPECIFIC_FACTOR_11', 194, 197),
+        ('CS_SITESPECIFIC_FACTOR_12', 197, 200),
+        ('CS_SITESPECIFIC_FACTOR_13', 200, 203),
+        ('CS_SITESPECIFIC_FACTOR_14', 203, 206),
+        ('CS_SITESPECIFIC_FACTOR_15', 206, 209),
+        ('CS_SITESPECIFIC_FACTOR_16', 209, 212),
+        ('CS_SITESPECIFIC_FACTOR_17', 212, 215),
+        ('CS_SITESPECIFIC_FACTOR_18', 215, 218),
+        ('CS_SITESPECIFIC_FACTOR_19', 218, 221),
+        ('CS_SITESPECIFIC_FACTOR_20', 221, 224),
+        ('CS_SITESPECIFIC_FACTOR_21', 224, 227),
+        ('CS_SITESPECIFIC_FACTOR_22', 227, 230),
+        ('CS_SITESPECIFIC_FACTOR_23', 230, 233),
+        ('CS_SITESPECIFIC_FACTOR_24', 233, 236),
+        ('CS_SITESPECIFIC_FACTOR_25', 236, 239),
+        ('CS_VERSION_LATEST', 239, 245),
+        ('DX_RX_STARTED_DAYS', 245, 253),
+        ('DX_SURG_STARTED_DAYS', 253, 261),
+        ('DX_DEFSURG_STARTED_DAYS', 261, 269),
+        ('RX_SUMM_SURG_PRIM_SITE', 269, 271),
+        ('RX_HOSP_SURG_APPR_2010', 271, 272),
+        ('RX_SUMM_SURGICAL_MARGINS', 272, 273),
+        ('RX_SUMM_SCOPE_REG_LN_SUR', 273, 274),
+        ('RX_SUMM_SURG_OTH_REGDIS', 274, 275),
+        ('SURG_DISCHARGE_DAYS', 275, 283),
+        ('READM_HOSP_30_DAYS', 283, 284),
+        ('REASON_FOR_NO_SURGERY', 284, 285),
+        ('DX_RAD_STARTED_DAYS', 285, 293),
+        ('RAD_LOCATION_OF_RX', 293, 294),
+        ('RX_SUMM_SURGRAD_SEQ', 294, 295),
+        ('RAD_ELAPSED_RX_DAYS', 295, 298),
+        ('REASON_FOR_NO_RADIATION', 298, 299),
+        ('DX_SYSTEMIC_STARTED_DAYS', 299, 307),
+        ('DX_CHEMO_STARTED_DAYS', 307, 315),
+        ('RX_SUMM_CHEMO', 315, 317),
+        ('DX_HORMONE_STARTED_DAYS', 317, 325),
+        ('RX_SUMM_HORMONE', 325, 327),
+        ('DX_IMMUNO_STARTED_DAYS', 327, 335),
+        ('RX_SUMM_IMMUNOTHERAPY', 335, 337),
+        ('RX_SUMM_TRNSPLNT_ENDO', 337, 339),
+        ('RX_SUMM_SYSTEMIC_SUR_SEQ', 339, 340),
+        ('DX_OTHER_STARTED_DAYS', 340, 348),
+        ('RX_SUMM_OTHER', 348, 349),
+        ('PALLIATIVE_CARE', 349, 350),
+        ('RX_SUMM_TREATMENT_STATUS', 350, 351),
+        ('PUF_30_DAY_MORT_CD', 351, 352),
+        ('PUF_90_DAY_MORT_CD', 352, 353),
+        ('DX_LASTCONTACT_DEATH_MONTHS', 353, 361),
+        ('PUF_VITAL_STATUS', 361, 362),
+        ('RX_HOSP_SURG_PRIM_SITE', 362, 364),
+        ('RX_HOSP_CHEMO', 364, 366),
+        ('RX_HOSP_IMMUNOTHERAPY', 366, 368),
+        ('RX_HOSP_HORMONE', 368, 370),
+        ('RX_HOSP_OTHER', 370, 372),
+        ('PUF_MULT_SOURCE', 372, 373),
+        ('PUF_REFERENCE_DATE_FLAG', 373, 374),
+        ('RX_SUMM_SCOPE_REG_LN_2012', 374, 375),
+        ('RX_HOSP_DXSTG_PROC', 375, 377),
+        ('PALLIATIVE_CARE_HOSP', 377, 378),
+        ('TUMOR_SIZE_SUMMARY_2016', 378, 381),
+        ('METS_AT_DX_OTHER', 381, 382),
+        ('METS_AT_DX_DISTANT_LN', 382, 383),
+        ('METS_AT_DX_BONE', 383, 384),
+        ('METS_AT_DX_BRAIN', 384, 385),
+        ('METS_AT_DX_LIVER', 385, 386),
+        ('METS_AT_DX_LUNG', 386, 387),
+        ('NO_HSD_QUAR_2016', 387, 388),
+        ('MED_INC_QUAR_2016', 388, 389),
+        ('PUF_MEDICAID_EXPN_CODE', 389, 390),
+        ('PHASE_I_RT_VOLUME', 390, 392),
+        ('PHASE_I_RT_TO_LN', 392, 394),
+        ('PHASE_I_DOSE_FRACT', 394, 399),
+        ('PHASE_I_NUM_FRACT', 399, 402),
+        ('PHASE_I_BEAM_TECH', 402, 404),
+        ('PHASE_I_TOTAL_DOSE', 404, 410),
+        ('PHASE_I_RT_MODALITY', 410, 412),
+        ('PHASE_II_RT_VOLUME', 412, 414),
+        ('PHASE_II_RT_TO_LN', 414, 416),
+        ('PHASE_II_DOSE_FRACT', 416, 421),
+        ('PHASE_II_NUM_FRACT', 421, 424),
+        ('PHASE_II_BEAM_TECH', 424, 426),
+        ('PHASE_II_TOTAL_DOSE', 426, 432),
+        ('PHASE_II_RT_MODALITY', 432, 434),
+        ('PHASE_III_RT_VOLUME', 434, 436),
+        ('PHASE_III_RT_TO_LN', 436, 438),
+        ('PHASE_III_DOSE_FRACT', 438, 443),
+        ('PHASE_III_NUM_FRACT', 443, 446),
+        ('PHASE_III_BEAM_TECH', 446, 448),
+        ('PHASE_III_TOTAL_DOSE', 448, 454),
+        ('PHASE_III_RT_MODALITY', 454, 456),
+        ('NUMBER_PHASES_RAD_RX', 456, 458),
+        ('RAD_RX_DISC_EARLY', 458, 460),
+        ('TOTAL_DOSE', 460, 466),
+        ('ADENOID_CYSTIC_BSLD', 466, 471),
+        ('ADENOPATHY', 471, 472),
+        ('AFP_POST_ORCH_RANGE', 472, 473),
+        ('AFP_POST_ORCH_VALUE', 473, 480),
+        ('AFP_PRE_INTERP', 480, 481),
+        ('AFP_PRE_ORCH_RANGE', 481, 482),
+        ('AFP_PRE_ORCH_VALUE', 482, 489),
+        ('AFP_PRE_VALUE', 489, 495),
+        ('AJCC_ID', 495, 499),
+        ('AJCC_TNM_CLIN_M', 499, 514),
+        ('AJCC_TNM_CLIN_N', 514, 529),
+        ('AJCC_TNM_CLIN_N_SFX', 529, 533),
+        ('AJCC_TNM_CLIN_STG_GRP', 533, 548),
+        ('AJCC_TNM_CLIN_T', 548, 563),
+        ('AJCC_TNM_CLIN_T_SFX', 563, 567),
+        ('AJCC_TNM_PATH_M', 567, 582),
+        ('AJCC_TNM_PATH_N', 582, 597),
+        ('AJCC_TNM_PATH_N_SFX', 597, 601),
+        ('AJCC_TNM_PATH_STG_GRP', 601, 616),
+        ('AJCC_TNM_PATH_T', 616, 631),
+        ('AJCC_TNM_PATH_T_SFX', 631, 635),
+        ('AJCC_TNM_POST_PATH_M', 635, 650),
+        ('AJCC_TNM_POST_PATH_N', 650, 665),
+        ('AJCC_TNM_POST_PATH_N_SFX', 665, 669),
+        ('AJCC_TNM_POST_PATH_STG_GRP', 669, 684),
+        ('AJCC_TNM_POST_PATH_T', 684, 699),
+        ('AJCC_TNM_POST_PATH_T_SFX', 699, 703),
+        ('ALBUMIN_PRE_TX_LEVL', 703, 704),
+        ('ANEMIA', 704, 705),
+        ('B_SYMPTOMS', 705, 706),
+        ('BASAL_DIAMETER', 706, 710),
+        ('BETA2MG_PRE_TX_LVL', 710, 711),
+        ('BEYOND_CAPSULE', 711, 712),
+        ('BILIRUBIN_PRE_UNIT', 712, 713),
+        ('BILIRUBIN_PRE_VALUE', 713, 718),
+        ('BONE_INVASION', 718, 719),
+        ('BRAIN_MOL_MARKERS', 719, 721),
+        ('BRESLOW_THICKNESS', 721, 725),
+        ('CA125_PRE_INTERP', 725, 726),
+        ('CEA_PRE_INTERP', 726, 727),
+        ('CEA_PRE_VALUE', 727, 733),
+        ('CHROMOSOME_19QLOH', 733, 734),
+        ('CHROMOSOME_1PLOH', 734, 735),
+        ('CHROMOSOME_3_STATUS', 735, 736),
+        ('CHROMOSOME_8Q_STAT', 736, 737),
+        ('CREATININE_PRE_UNIT', 737, 738),
+        ('CREATININE_PRE_VALU', 738, 742),
+        ('CRM', 742, 746),
+        ('ENE_CLIN_HN', 746, 747),
+        ('ENE_CLIN_NOT_HN', 747, 748),
+        ('ENE_PATH_HN', 748, 751),
+        ('ENE_PATH_NOT_HN', 751, 752),
+        ('ER_PERCENT_POS_OR_RNG', 752, 755),
+        ('ER_SUMMARY', 755, 756),
+        ('ER_TOTAL_ALLRED', 756, 758),
+        ('ESOPH_EPICENTER', 758, 759),
+        ('EXTRAVASC_MATRIX', 759, 760),
+        ('FIBROSIS_SCORE', 760, 761),
+        ('FIGO_STAGE', 761, 763),
+        ('GEST_PROGNOST_INDEX', 763, 765),
+        ('GLEASON_PAT_CLIN', 765, 767),
+        ('GLEASON_PAT_PATH', 767, 769),
+        ('GLEASON_SCORE_CLIN', 769, 771),
+        ('GLEASON_SCORE_PATH', 771, 773),
+        ('GLEASON_SCORE_TERTIARY_PT', 773, 775),
+        ('GRADE_CLIN', 775, 776),
+        ('GRADE_PATH', 776, 777),
+        ('GRADE_PATH_POST', 777, 778),
+        ('HCG_POST_ORCH_RANGE', 778, 779),
+        ('HCG_POST_ORCH_VALUE', 779, 786),
+        ('HCG_PRE_ORCH_RANGE', 786, 787),
+        ('HCG_PRE_ORCH_VALUE', 787, 794),
+        ('HER2_IHC_SUMMARY', 794, 795),
+        ('HER2_ISH_DUAL_NUM', 795, 799),
+        ('HER2_ISH_DUAL_RATIO', 799, 803),
+        ('HER2_ISH_SINGLE_NUM', 803, 807),
+        ('HER2_ISH_SUMMARY', 807, 808),
+        ('HER2_OVERALL_SUMM', 808, 809),
+        ('HERITABLE_TRAIT', 809, 810),
+        ('HIGH_RISK_CYTOGENET', 810, 811),
+        ('HIGH_RISK_HIST_FEAT', 811, 812),
+        ('HIV_STATUS', 812, 813),
+        ('IMMUNE_SUPP', 813, 814),
+        ('INR_PRO_TIME', 814, 817),
+        ('IPSI_ADRENAL_INVOL', 817, 818),
+        ('JAK2', 818, 819),
+        ('KI67', 819, 824),
+        ('KIT_GENE_IHC', 824, 825),
+        ('KRAS', 825, 826),
+        ('LDH_POST_ORCH_RANGE', 826, 827),
+        ('LDH_PRE_ORCH_RANGE', 827, 828),
+        ('LDH_PRE_TX_LEVEL', 828, 829),
+        ('LDH_PRE_TX_VALUE', 829, 836),
+        ('LDH_UPPER_NORMAL', 836, 839),
+        ('LN_DIST_MEDIAS_SCALN', 839, 840),
+        ('LN_DISTANT_METHOD', 840, 841),
+        ('LN_FEM_ING_PARA_APELV', 841, 842),
+        ('LN_ITC', 842, 843),
+        ('LN_LATERALITY', 843, 844),
+        ('LN_METHOD_FEMING', 844, 845),
+        ('LN_METHOD_PARA_AORT', 845, 846),
+        ('LN_METHOD_PELVIC', 846, 847),
+        ('LN_POS_AX_LEVELS_I_II', 847, 849),
+        ('LN_SIZE', 849, 853),
+        ('LNHN_LEVELS_I_III', 853, 854),
+        ('LNHN_LEVELS_IV_V', 854, 855),
+        ('LNHN_LEVELS_OTHER', 855, 856),
+        ('LNHN_LEVELS_VI_VII', 856, 857),
+        ('LYMPHOCYTOSIS', 857, 858),
+        ('MAJOR_VEIN_INVOLV', 858, 859),
+        ('METHYLATION_O6MGMT', 859, 860),
+        ('MICROVASC_DENSITY', 860, 862),
+        ('MITOTIC_COUNT_UVEA', 862, 866),
+        ('MITOTIC_RATE_MELANO', 866, 868),
+        ('MSI', 868, 869),
+        ('MULTIGENE_METHOD', 869, 870),
+        ('MULTIGENE_RESULTS', 870, 872),
+        ('NCCN_IPI', 872, 874),
+        ('NUM_CORES_EXAM', 874, 876),
+        ('NUM_CORES_POS', 876, 878),
+        ('NUM_NODES_EXAM_PARA_A', 878, 880),
+        ('NUM_NODES_POS_PARA_A', 880, 882),
+        ('NUM_PELV_NODES_EXAM', 882, 884),
+        ('NUM_PELV_NODES_POS', 884, 886),
+        ('ONCOTYPE_RISK_DCIS', 886, 887),
+        ('ONCOTYPE_RISK_INVAS', 887, 888),
+        ('ONCOTYPE_SCORE_DCIS', 888, 891),
+        ('ONCOTYPE_SCORE_INV', 891, 894),
+        ('ORGANOMEGALY', 894, 895),
+        ('P_SCLER_CHOLANGITIS', 895, 896),
+        ('PERCNT_NECROS_POST', 896, 901),
+        ('PERINEURAL_INV', 901, 902),
+        ('PERIPH_BLOOD_INV', 902, 903),
+        ('PERITONEAL_CYTOL', 903, 904),
+        ('PLEURAL_EFFUSION', 904, 905),
+        ('PLEURAL_INV', 905, 906),
+        ('PR_PERCENT_POS_OR_RNG', 906, 909),
+        ('PR_SUMMARY', 909, 910),
+        ('PR_TOTAL_ALLRED', 910, 912),
+        ('PROSTATE_PATH_EXT', 912, 915),
+        ('PSA', 915, 920),
+        ('RSPNS_TO_NEOADJUVT', 920, 921),
+        ('S_CAT_CLIN', 921, 922),
+        ('S_CAT_PATH', 922, 923),
+        ('SARCOMATOID', 923, 926),
+        ('SCHEMA_DISC_1', 926, 927),
+        ('SCHEMA_DISC_2', 927, 928),
+        ('SCHEMA_DISC_3', 928, 929),
+        ('SCHEMA_ID', 929, 934),
+        ('SEP_NODULES', 934, 935),
+        ('SLN_EXAM', 935, 937),
+        ('SLN_POS', 937, 939),
+        ('THICKNESS', 939, 943),
+        ('THROMBOCYTOPENIA', 943, 944),
+        ('TUMOR_DEPOSITS', 944, 946),
+        ('TUMOR_GROWTH_PAT', 946, 947),
+        ('ULCERATION', 947, 948),
+        ('SENTINEL_LNBX_STARTED_DAY', 948, 956),
+        ('REG_LN_DISS_STARTED_DAY', 956, 964),
+        ('RESID_POST_CYTOREDU', 964, 966),
+        ('NO_HSD_QUAR_2020', 966, 967),
+        ('MED_INC_QUAR_2020', 967, 968),
+        ('SARSCOV2_POS', 968, 969),
+        ('SARSCOV2_POS_DAYS', 969, 977),
+        ('SARSCOV2_TEST', 977, 978),
+        ('GRADE_POST_THERAPY_CLIN_YC', 978, 979),
+        ('AJCC_TNM_POST_CLIN_YC_M', 979, 994),
+        ('AJCC_TNM_POST_CLIN_YC_N', 994, 1009),
+        ('AJCC_TNM_POST_CLIN_YC_N_SUF', 1009, 1013),
+        ('AJCC_TNM_POST_CLIN_YC_T', 1013, 1028),
+        ('AJCC_TNM_POST_CLIN_YC_T_SUF', 1028, 1032),
+    ]
+
+    # Extract columns efficiently
+    for name, start, end in columns:
+        data[name] = data[0].str[start:end]
+
+    return data
+
+
+# Data preprocessing function
+def preprocessing(df):
+    """
+    Preprocess the extracted NCDB data by converting codes to labels, handling data types, and cleaning strings.
+
+    Args:
+        df (pd.DataFrame): The extracted DataFrame from the extraction function.
+
+    Returns:
+        pd.DataFrame: The preprocessed DataFrame with labels and cleaned data.
+    """
+    df = df.copy()
+
+    # Remove leading and trailing whitespaces from all string columns
+    df = df.apply(lambda col: col.str.strip() if col.dtype == 'object' else col)
+
+    # Step 1: Relabel 'SEX' and convert code to text: Male (1) and Female (2)
+    sex_mapping = {
+        '1': 'Male',
+        '2': 'Female'
+    }
+    df['SEX'] = df['SEX'].map(sex_mapping)
+
+    # Step 2: Convert age to numeric
+    df['AGE'] = df['AGE'].astype('int64')
+
+    # Step 3: Relabel 'Race' and convert code to text
+    race_mapping = {
+        '01': 'White',
+        '02': 'Black',
+        '03': 'American Indian, Aleutian, or Eskimo',
+        '04': 'Chinese',
+        '05': 'Japanese',
+        '06': 'Filipino',
+        '07': 'Hawaiian',
+        '08': 'Korean',
+        '10': 'Vietnamese',
+        '11': 'Laotian',
+        '12': 'Hmong',
+        '13': 'Kampuchean (including Khmer and Cambodian)',
+        '14': 'Thai',
+        '15': 'Asian Indian or Pakistani, NOS (formerly code 09)',
+        '16': 'Asian Indian',
+        '17': 'Pakistani',
+        '20': 'Micronesian, NOS',
+        '21': 'Chamorran',
+        '22': 'Guamanian, NOS',
+        '25': 'Polynesian, NOS',
+        '26': 'Tahitian',
+        '27': 'Samoan',
+        '28': 'Tongan',
+        '30': 'Melanesian, NOS',
+        '31': 'Fiji Islander',
+        '32': 'New Guinean',
+        '96': 'Other Asian, including Asian, NOS and Oriental, NOS',
+        '98': 'Other',
+        '99': 'Unknown'
+    }
+    df['RACE'] = df['RACE'].map(race_mapping)
+
+    # Step 4: Relabel Spanish/Hispanic origin
+    ethnicity_mapping = {
+        '0': 'Non-Spanish, Non-Hispanic',
+        '1': 'Mexican (includes Chicano)',
+        '2': 'Puerto Rican',
+        '3': 'Cuban',
+        '4': 'South or Central America (except Brazil)',
+        '5': 'Other Specified Spanish/Hispanic Origin (includes European; excludes Dominican Republic)',
+        '6': 'Spanish, NOS; Hispanic, NOS; Latino, NOS (There is evidence other than surname or maiden name that the person is Hispanic, but he/she cannot be assigned to any category of 1 - 5)',
+        '7': 'Spanish surname only (The only evidence of the person\'s Hispanic origin is surname or maiden name, and there is no contrary evidence that the person is not Hispanic)',
+        '8': 'Dominican Republic (for use with patients who were diagnosed with cancer on January 1, 2005, or later)',
+        '9': 'Unknown whether of Spanish/Hispanic origin; not stated in patient record'
+    }
+    df['SPANISH_HISPANIC_ORIGIN'] = df['SPANISH_HISPANIC_ORIGIN'].map(ethnicity_mapping)
+
+    # Step 5: Relabel urban/rural location
+    urban_rural_mapping = {
+        '1': 'Counties in metro areas of 1 million population or more',
+        '2': 'Counties in metro areas of 250,000 to 1 million population',
+        '3': 'Counties in metro areas of fewer than 250,000 population',
+        '4': 'Urban population of 20,000 or more, adjacent to a metro area',
+        '5': 'Urban population of 20,000 or more, not adjacent to a metro area',
+        '6': 'Urban population of 2,500 to 19,999, adjacent to a metro area',
+        '7': 'Urban population of 2,500 to 19,999, not adjacent to a metro area',
+        '8': 'Completely rural or less than 2,500 urban population, adjacent to a metro area',
+        '9': 'Completely rural or less than 2,500 urban population, not adjacent to a metro area',
+    }
+    df['Urban/Rural 2003'] = df['Urban/Rural 2003'].map(urban_rural_mapping)
+    df['Urban/Rural 2013'] = df['Urban/Rural 2013'].map(urban_rural_mapping)
+
+    # Step 6: Relabel insurance status
+    insurance_mapping = {
+        '0': 'Not Insured',
+        '1': 'Private Insurance / Managed Care',
+        '2': 'Medicaid',
+        '3': 'Medicare',
+        '4': 'Other Government',
+        '9': 'Insurance Status Unknown',
+    }
+    df['INSURANCE_STATUS'] = df['INSURANCE_STATUS'].map(insurance_mapping)
+
+    # Step 7: Relabel median income levels
+    income_mappings = {
+        'MED_INC_QUAR_00': {
+            '1': '< $30,000',
+            '2': '$30,000 - $34,999',
+            '3': '$35,000 - $45,999',
+            '4': '$46,000+'
+        },
+        'MED_INC_QUAR_12': {
+            '1': '< $38,000',
+            '2': '$38,000 - $47,999',
+            '3': '$48,000 - $62,999',
+            '4': '$63,000+'
+        },
+        'MED_INC_QUAR_2016': {
+            '1': '< $40,227',
+            '2': '$40,227 - $50,353',
+            '3': '$50,354 - $63,332',
+            '4': '$63,333+'
+        },
+        'MED_INC_QUAR_2020': {
+            '1': '< $46,277',
+            '2': '$46,277 - $57,856',
+            '3': '$57,857 - $74,062',
+            '4': '$74,062+'
+        }
+    }
+    for col, mapping in income_mappings.items():
+        df[col] = df[col].map(mapping)
+
+    # Step 8: Relabel high school degree percentages
+    education_mappings = {
+        'NO_HSD_QUAR_00': {
+            '1': '29.0% +',
+            '2': '20.0% - 28.9%',
+            '3': '14.0% - 19.9%',
+            '4': '<14.0%'
+        },
+        'NO_HSD_QUAR_12': {
+            '1': '21.0% +',
+            '2': '13.0% - 20.9%',
+            '3': '7.0% - 12.9%',
+            '4': '<7.0%'
+        },
+        'NO_HSD_QUAR_2016': {
+            '1': '17.6% +',
+            '2': '10.9% - 17.5%',
+            '3': '6.3% - 10.8%',
+            '4': '<6.3%'
+        },
+        'NO_HSD_QUAR_2020': {
+            '1': '15.3% +',
+            '2': '9.1% - 15.2%',
+            '3': '5.0% - 9.0%',
+            '4': '<5.0%'
+        }
+    }
+    for col, mapping in education_mappings.items():
+        df[col] = df[col].map(mapping)
+
+    # Step 9: Relabel facility type
+    facility_mapping = {
+        '1': 'Community Cancer Program',
+        '2': 'Comprehensive Community Cancer Program',
+        '3': 'Academic/Research Program (includes NCI-designated comprehensive cancer centers)',
+        '4': 'Integrated Network Cancer Program'
+    }
+    df['FACILITY_TYPE_CD'] = df['FACILITY_TYPE_CD'].map(facility_mapping)
+
+    # Step 10: Strip empty spaces from AJCC TNM variables and replace empty with 'na'
+    ajcc_cols = [
+        'AJCC_TNM_PATH_T', 'AJCC_TNM_PATH_N', 'AJCC_TNM_PATH_M',
+        'AJCC_TNM_CLIN_T', 'AJCC_TNM_CLIN_N', 'AJCC_TNM_CLIN_M',
+        'AJCC_TNM_CLIN_STG_GRP', 'AJCC_TNM_PATH_STG_GRP',
+        'AJCC_TNM_POST_CLIN_YC_T', 'AJCC_TNM_POST_CLIN_YC_N', 'AJCC_TNM_POST_CLIN_YC_M',
+        'AJCC_TNM_POST_PATH_T', 'AJCC_TNM_POST_PATH_N', 'AJCC_TNM_POST_PATH_M'
+    ]
+    for col in ajcc_cols:
+        df[col] = df[col].replace('', 'na')
+
+    # Step 11: Convert days variables to numeric
+    days_cols = [
+        'DX_SURG_STARTED_DAYS', 'DX_CHEMO_STARTED_DAYS', 'DX_DEFSURG_STARTED_DAYS',
+        'DX_RX_STARTED_DAYS', 'SURG_DISCHARGE_DAYS', 'DX_RAD_STARTED_DAYS',
+        'RAD_ELAPSED_RX_DAYS', 'DX_SYSTEMIC_STARTED_DAYS', 'DX_HORMONE_STARTED_DAYS',
+        'DX_IMMUNO_STARTED_DAYS', 'DX_OTHER_STARTED_DAYS', 'SENTINEL_LNBX_STARTED_DAY',
+        'REG_LN_DISS_STARTED_DAY', 'DX_STAGING_PROC_DAYS'
+    ]
+    for col in days_cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    # Step 12: Convert great circle distance to numeric
+    df['Great Circle Distance'] = pd.to_numeric(df['Great Circle Distance'], errors='coerce')
+
+    # Step 13: Convert last contact months to numeric and rename vital status
+    df['Follow_up_months'] = pd.to_numeric(df['DX_LASTCONTACT_DEATH_MONTHS'], errors='coerce')
+    df['Vital_Status'] = df['PUF_VITAL_STATUS']
+
+    return df
