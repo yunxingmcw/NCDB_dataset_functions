@@ -336,6 +336,21 @@ def extraction(data):
         ('AJCC_TNM_POST_CLIN_YC_N_SUF', 1009, 1013),
         ('AJCC_TNM_POST_CLIN_YC_T', 1013, 1028),
         ('AJCC_TNM_POST_CLIN_YC_T_SUF', 1028, 1032),
+        ('AJCC_TNM_POST_THER_CLIN_YC_GRP', 1032, 1047)
+        ('MACROSCOPIC_EVAL_TMESORECTUM', 1047, 1049),
+        ('DERIVED_RAI_STAGEP16', 1049, 1050),
+        ('P16', 1050, 1051),
+        ('LN_STATUS_PARA_AORTIC', 1052, 1053),
+        ('LN_STATUS_FEMORAL_INGUINAL', 1053, 1054),
+        ('RX_HOSP_SURG_BREAST', 1054, 1058),
+        ('RX_SUMM_SURG_BREAST', 1058, 1062),
+        ('RX_HOSP_RECON_BREAS', 1062, 1066),
+        ('RX_SUMM_RECON_BREAS', 1066, 1070),
+        ('ALK_REARRANGEMENT', 1070, 1072),
+        ('EGFR_MUTATIONAL_ANALYSIS', 1072, 1073),
+        ('BRAF_MUTATIONAL_ANALYSIS', 1073, 1074),
+        ('NRAS_MUTATIONAL_ANALYSIS', 1074, 1075),
+        ('CA_19_9_PRETX_LAB_VALUE', 1075, 1080)
     ]
 
     # Extract columns efficiently
@@ -528,11 +543,19 @@ def preprocessing(df):
 
     # Step 11: Convert days variables to numeric
     days_cols = [
-        'DX_SURG_STARTED_DAYS', 'DX_CHEMO_STARTED_DAYS', 'DX_DEFSURG_STARTED_DAYS',
-        'DX_RX_STARTED_DAYS', 'SURG_DISCHARGE_DAYS', 'DX_RAD_STARTED_DAYS',
-        'RAD_ELAPSED_RX_DAYS', 'DX_SYSTEMIC_STARTED_DAYS', 'DX_HORMONE_STARTED_DAYS',
-        'DX_IMMUNO_STARTED_DAYS', 'DX_OTHER_STARTED_DAYS', 'SENTINEL_LNBX_STARTED_DAY',
-        'REG_LN_DISS_STARTED_DAY', 'DX_STAGING_PROC_DAYS'
+        'DX_CHEMO_STARTED_DAYS',
+        'DX_DEFSURG_STARTED_DAYS',
+        'DX_HORMONE_STARTED_DAYS',
+        'DX_IMMUNO_STARTED_DAYS',
+        'DX_OTHER_STARTED_DAYS',
+        'DX_RAD_STARTED_DAYS',
+        'DX_RX_STARTED_DAYS',
+        'DX_STAGING_PROC_DAYS',
+        'DX_SURG_STARTED_DAYS',
+        'DX_SYSTEMIC_STARTED_DAYS',
+        'RAD_ELAPSED_RX_DAYS',
+        'SARSCOV2_POS_DAYS',
+        'SURG_DISCHARGE_DAYS',
     ]
     for col in days_cols:
         df[col] = pd.to_numeric(df[col], errors='coerce')
