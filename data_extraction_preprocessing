@@ -356,7 +356,7 @@ def extraction(data):
         ('CLINICAL_MARGIN_WIDTH', 1081, 1085),
         ('HISTOLOGIC_SUBTYPE', 1085, 1086),
         ('RX_HOSP_SURG_PRIM_SITE_2023', 1086, 1090),
-         ('RX_SUMM_SURG_PRIM_SITE_2023', 1090, 1094),
+        ('RX_SUMM_SURG_PRIM_SITE_2023', 1090, 1094),
         ('UR_CD_23', 1094, 1095)
     
     ]
