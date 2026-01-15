@@ -1,11 +1,7 @@
 # NCDB_dataset_functions
 This is the python code for data extraction and preprocessing of NCDB datasets. 
 
-The extraction is based on the 2022-PUF data structure.
-
-Updates 1/15/26:
-
-Based on the NCDB Quick Data Structure PUF 2023 data structure; new string length: 1095 characters, six new variables added:
+The version is based on the 2023-PUF data structure, in which the flat-text string is 1095 charcters long along with six new variables added:
 
   Tobacco Use Smoking Status (1048)
   
