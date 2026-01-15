@@ -15,4 +15,4 @@ The version is based on the 2023-PUF data structure, in which the flat-text stri
   
   and UR_CD_23 (1095).
 
-Code for earlier PUF versions can be found in branch
+Code for earlier PUF versions can be found in branch 2022_PUF_version. 
